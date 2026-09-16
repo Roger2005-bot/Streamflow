@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>StreamFlow — V2</title>
+<style>
+:root{--bg:#050b14;--panel:#0b1625;--line:#1c3148;--text:#f4f8ff;--muted:#91a5bc;--blue:#1698ee}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,system-ui,-apple-system,Segoe UI,sans-serif}
+header{height:70px;display:flex;align-items:center;gap:18px;padding:0 24px;background:#07111e;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:10}
+.logo{font-size:23px;font-weight:850;white-space:nowrap}.logo span{color:#27a9ff}
+nav{display:flex;gap:4px}nav button,.account{background:none;border:0;color:#aebed0;padding:10px 12px;border-radius:9px;cursor:pointer}nav button:hover,nav button.active{background:#12365c;color:#fff}
+.search{margin-left:auto;width:min(390px,38vw);padding:11px 16px;border-radius:22px;border:1px solid var(--line);background:#0e1c2d;color:#fff;outline:none}
+main{max-width:1280px;margin:auto;padding:24px}
+.hero{min-height:340px;border:1px solid var(--line);border-radius:18px;padding:42px;display:flex;align-items:center;background:linear-gradient(90deg,#07101c 5%,rgba(7,16,28,.9) 45%,rgba(7,16,28,.2)),radial-gradient(circle at 78% 45%,#195a86,#08111d 58%)}
+.badge{font-size:11px;background:#147fc9;padding:6px 9px;border-radius:14px}.hero h1{font-size:48px;margin:14px 0 4px}.hero p{max-width:650px;color:#b6c6d8;line-height:1.5}
+.btn{border:0;border-radius:9px;padding:11px 17px;font-weight:700;cursor:pointer;margin-right:8px}.primary{background:#fff;color:#06101b}.secondary{background:#12304d;color:#fff;border:1px solid #2a4b67}
+.section{margin-top:30px}.section h2{margin:0 0 15px}.filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}.filter{background:#0d1b2b;border:1px solid var(--line);color:#b6c6d8;border-radius:18px;padding:8px 13px;cursor:pointer}.filter.on{background:#126eae;color:#fff}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:16px}.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;overflow:hidden;cursor:pointer}.card:hover{border-color:#2b9ce9;transform:translateY(-2px)}.poster{height:225px;padding:12px;display:flex;align-items:flex-end;font-size:22px;font-weight:850;background:linear-gradient(145deg,#224d73,#0b1420)}.card:nth-child(3n) .poster{background:linear-gradient(145deg,#5a3324,#111724)}.card:nth-child(4n) .poster{background:linear-gradient(145deg,#264a3b,#0c1620)}.meta{padding:10px}.meta small{color:var(--muted)}.pills{display:flex;gap:5px;margin-top:7px}.pill{font-size:10px;background:#123a60;padding:4px 7px;border-radius:12px;color:#a8dcff}
+.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.82);z-index:20;align-items:center;justify-content:center;padding:18px}.modal.open{display:flex}.box{width:min(820px,100%);background:#0a1624;border:1px solid #26445e;border-radius:18px;padding:22px}.close{float:right;background:#172a3d;color:#fff;border:0;border-radius:8px;padding:8px;cursor:pointer}.player{margin-top:15px;background:#02060b;border-radius:12px;aspect-ratio:16/9;display:flex;align-items:center;justify-content:center;overflow:hidden}.player video{width:100%;height:100%;object-fit:cover}.demo{color:#8ea5bd;text-align:center;padding:20px}.notice{margin-top:12px;padding:12px;border:1px solid #29435a;border-radius:10px;color:#9fb1c4;font-size:13px}
+.empty{padding:35px;border:1px dashed #294158;border-radius:12px;color:var(--muted)}
+@media(max-width:800px){header{padding:0 12px}.logo{font-size:19px}nav{display:none}.search{width:45%}main{padding:14px}.hero{padding:25px;min-height:300px}.hero h1{font-size:37px}.grid{grid-template-columns:repeat(2,1fr)}.poster{height:190px}}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">▶ Stream<span>Flow</span></div>
+  <nav>
+    <button class="active" onclick="setType('Tous',this)">Accueil</button>
+    <button onclick="setType('Film',this)">Films</button>
+    <button onclick="setType('Série',this)">Séries</button>
+    <button onclick="showFavorites(this)">☆ Ma liste</button>
+  </nav>
+  <input id="q" class="search" placeholder="Rechercher un film, une série…" oninput="render()">
+</header>
+
+<main>
+<section class="hero">
+  <div>
+    <span class="badge">STREAMFLOW V2</span>
+    <h1>Ton cinéma, simplement.</h1>
+    <p>Recherche rapide, filtres de langue et fiches détaillées. Cette version utilise uniquement des contenus de démonstration afin de préparer la structure du futur service.</p>
+    <button class="btn primary" onclick="openItem(items[0])">▶ Voir la démo</button>
+    <button class="btn secondary" onclick="document.getElementById('catalogue').scrollIntoView()">Explorer le catalogue</button>
+  </div>
+</section>
+
+<section id="catalogue" class="section">
+<h2 id="heading">Catalogue</h2>
+<div class="filters">
+ <button class="filter on" onclick="setLang('Tous',this)">Tous</button>
+ <button class="filter" onclick="setLang('VF',this)">🇫🇷 VF</button>
+ <button class="filter" onclick="setLang('VOSTFR',this)">VOSTFR</button>
+ <button class="filter" onclick="setLang('VO',this)">VO</button>
+</div>
+<div id="grid" class="grid"></div>
+</section>
+</main>
+
+<div id="modal" class="modal" onclick="if(event.target===this)closeModal()">
+ <div class="box">
+  <button class="close" onclick="closeModal()">✕</button>
+  <h2 id="mt"></h2>
+  <div class="player">
+    <div class="demo">▶<br><br>Lecteur de démonstration<br><small>Aucune vidéo commerciale n'est intégrée à ce prototype.</small></div>
+  </div>
+  <p id="mi"></p>
+  <div id="ml" class="pills"></div>
+  <div class="notice">Pour la version publique, les films et séries devront être ajoutés uniquement avec les droits/licences nécessaires. Le système pourra ensuite gérer les versions VF, VOSTFR et VO autorisées.</div>
+ </div>
+</div>
+
+<script>
+const items=[
+ {t:"The Last Horizon",type:"Film",year:2026,genre:"Science-fiction • Aventure",lang:["VF","VOSTFR","VO"]},
+ {t:"Night Protocol",type:"Film",year:2025,genre:"Action • Thriller",lang:["VF","VOSTFR"]},
+ {t:"Beyond the City",type:"Film",year:2024,genre:"Drame • Romance",lang:["VF","VO"]},
+ {t:"Red Signal",type:"Film",year:2026,genre:"Mystère • Thriller",lang:["VF","VOSTFR"]},
+ {t:"Parallel",type:"Série",year:2025,genre:"Science-fiction • Drame",lang:["VF","VOSTFR","VO"]},
+ {t:"The District",type:"Série",year:2024,genre:"Crime • Thriller",lang:["VF","VO"]},
+ {t:"After Midnight",type:"Série",year:2026,genre:"Mystère • Horreur",lang:["VF","VOSTFR"]},
+ {t:"Northside",type:"Série",year:2025,genre:"Drame • Action",lang:["VF","VO"]}
+];
+let type="Tous",lang="Tous",favorites=[],favMode=false;
+
+function setType(v,b){type=v;favMode=false;document.querySelectorAll("nav button").forEach(x=>x.classList.remove("active"));b.classList.add("active");render()}
+function setLang(v,b){lang=v;document.querySelectorAll(".filter").forEach(x=>x.classList.remove("on"));b.classList.add("on");render()}
+function showFavorites(b){favMode=true;document.querySelectorAll("nav button").forEach(x=>x.classList.remove("active"));b.classList.add("active");render()}
+function render(){
+ let q=document.getElementById("q").value.toLowerCase();
+ let a=items.filter(x=>(type==="Tous"||x.type===type)&&(lang==="Tous"||x.lang.includes(lang))&&x.t.toLowerCase().includes(q));
+ if(favMode)a=a.filter(x=>favorites.includes(x.t));
+ document.getElementById("heading").textContent=favMode?"Ma liste":"Catalogue";
+ document.getElementById("grid").innerHTML=a.length?a.map(x=>`
+ <article class="card" onclick='openItem(${JSON.stringify(x)})'>
+  <div class="poster">${x.t}</div>
+  <div class="meta"><b>${x.t}</b><br><small>${x.type} • ${x.year}<br>${x.genre}</small>
+  <div class="pills">${x.lang.map(l=>`<span class="pill">${l}</span>`).join("")}</div></div>
+ </article>`).join(""):'<div class="empty">Aucun résultat pour cette recherche.</div>';
+}
+function openItem(x){
+ document.getElementById("mt").textContent=x.t;
+ document.getElementById("mi").textContent=`${x.type} • ${x.year} • ${x.genre}`;
+ document.getElementById("ml").innerHTML=x.lang.map(l=>`<span class="pill">${l}</span>`).join("");
+ document.getElementById("modal").classList.add("open");
+}
+function closeModal(){document.getElementById("modal").classList.remove("open")}
+render();
+</script>
+</body>
+</html>
